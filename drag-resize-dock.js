@@ -1,3 +1,18 @@
+"use strict";
+
+var DragResizeDock = new function() {
+	var externalWiki, wikibox, wikititle, firstWiki = true;
+
+this.startup = function() {
+	var anchors = document.getElementsByTagName("a");
+	for (var x = 0; x < anchors.length; x++) {
+		if (hasclass(anchors[x], "DragResizeDock"))
+			anchors[x].onclick = click_wiki;
+	}
+	wikibox = document.getElementById("WikiBox");
+	wikititle = document.getElementById("WikiTitle");
+};
+
 var startWikiDrag = function(e) {
 	e = e || event;
 	removeclass(wikibox, "Expanding");
@@ -210,41 +225,29 @@ var doubleClickTitle = function(e) {
 
 var open_wiki_window = function(pos, size) {
 	releaseWiki();
-	for (var x = 0; x < pos.length; x++) pos[x] = Math.max(0, pos[x]);
+	for (var x = 0; x < pos.length; x++)
+		pos[x] = Math.max(0, pos[x]);
 	externalWiki = window.open(wikibox.externalHref, "WikiWindow", "width="+size[0]+",height="+size[1]+",left="+pos[0]+",top="+pos[1]+",resizable=yes,scrollbars=yes,location=yes");
 	return externalWiki;
 };
 
 var click_wiki = function(e) {
 	e = e || event;
-	var el = this || srcElement, article, url;
+	var el = (e.target || e.srcElement), article, url;
 
-	if (screen.width * screen.height < 1024 * 600 ||
-		typeof document.body.style.maxHeight === "undefined" ||
-		!navigator.onLine || e.ctrlKey || e.shiftKey ||
+	if (screen.width * screen.height < 1024 * 600 ||				// Skip for small tablets
+		typeof document.body.style.maxHeight === "undefined" ||		// Skip for IE6
+		!navigator.onLine || e.ctrlKey || e.shiftKey ||				// Passthrough Shift, Ctrl click
 		(e.which && (e.which === 2 || e.which === 3)) ||
-		(e.button && (e.button === 4 || e.button === 2)))
+		(e.button && (e.button === 4 || e.button === 2)))			// Passthrough middle click
 	return;
 
-	if (tab === "IsotopeTab" && el.parentNode.id === "isotopeholder")
-		article = el.getElementsByTagName("em")[0].innerHTML;
-	else if (hasclass(el.parentNode, "Element"))
-		article = el.childNodes[n_big].childNodes[n_name].innerHTML;
-	else
-		article = decodeURIComponent(el.href.substring(el.href.lastIndexOf("\/") + 1));
+	article = el.getAttribute("title");
 
 	document.getElementById("ElementName").innerHTML = article;
 	document.getElementById("ElementName").href = el.href;
-	document.getElementById("Source").innerHTML = document.getElementById(series).innerHTML;
 
-	if (tab === "IsotopeTab")
-		url = "http://" + language + ".wikipedia.org/w/index.php?title=" + encodeURIComponent(article) + "&printable=yes"; // inject an <a> into generated isotopes instead of this for isotopes
-	else if (el.href.indexOf(".wikipedia.org") !== -1)
-		url = "http://" + language + ".wikipedia.org/w/index.php?title=" + el.href.substring(el.href.lastIndexOf("\/") + 1) + "&printable=yes";
-	else
-		url = el.href;
-
-	_gaq.push(["_trackEvent", language, series, article]);
+	url = el.href;
 
 	if (externalWiki && !externalWiki.closed) {
 		externalWiki.location.href = url;
@@ -307,3 +310,30 @@ var iframe_loaded = function(e) {
 	document.getElementById("WikiFrameBox").style.display = "";
 	wikibox.getElementsByTagName("h2")[0].style.display = "none";
 };
+
+var addclass = function(el, name) {
+	if (!hasclass(el, name))
+		el.className += (el.className ? " " : "") + name;
+};
+
+var removeclass = function(el, name) {
+	if (hasclass(el, name))
+		el.className = el.className.replace(new RegExp("(\\s|^)" + name + "(\\s|$)"), " ").replace(/^\s+|\s+$/g, "");
+};
+
+var hasclass = function(el, name) {
+	return new RegExp("(\\s|^)" + name + "(\\s|$)").test(el.className);
+};
+
+var findPos = function(obj, lefttop) {
+	return (obj ? findPos(obj.offsetParent, [lefttop[0] - obj.offsetLeft, lefttop[1] - obj.offsetTop]) : lefttop);
+};
+
+var set_opacity = function(el, value) {
+	el.style.opacity = value;
+	el.style.filter = (value != 1) ? "alpha(Opacity=" + value * 100 + ")" : "";
+};
+
+}; // End DragResizeDock namespace
+
+window.onload = DragResizeDock.startup;

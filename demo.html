@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+<script src="drag-resize-dock.js"></script>
+<style>
+/*** Wikipedia iframe ***/
+#WikiBox			{ position: fixed; z-index: 101; cursor: progress; border-radius: 1.5ex; display: none; }
+#WikiBox.Expanding	{ border: 2px solid black; -webkit-transition: all 1s ease-in-out; -moz-transition: all 1s ease-in-out; -ms-transition: all 1s ease-in-out; transition: all 1s ease-in-out; display: block; }
+.Expanding h1, .Expanding h2	{ visibility: hidden; }
+#WikiBox.Expanded				{ top: 15%; left: 15%; width: 70%; height: 70%; border: thick solid #88F; display: block; background-color: white; }
+.Expanded h1, .Expanded h2		{ -webkit-transition-delay: 1s; -moz-transition-delay: 1s; -ms-transition-delay: 1s; transition-delay: 1s; visibility: visible; }
+#WikiFrameBox		{ position: absolute; top: 2em; left: 1ex; right: 0; bottom: 0; }
+#WikiFrame			{ height: 100%; width: 100%; }
+#WikiBox > #WikiFrameBox > iframe	{ position: absolute; }
+#WikiBox h1			{ border: thin inset; margin: 0; font-family: Verdana, sans-serif; font-size: small; line-height: 2; padding-left: 1ex; cursor: move; background-color: blue; float: none; }
+</style>
+</head>
+<body>
+ <a href="." class="DragResizeDock">Ptable</a>
+
+  <div id="WikiBox">
+   <h1 id="WikiTitle"><button id="Close">×</button><button id="Tearoff">⇧</button> <span id="Source"></span> - <a href="." id="ElementName"></a> - Title</h1>
+   <h2>Temporary loading text</h2>
+   <div id="WikiFrameBox"><iframe id="WikiFrame" name="WikiFrame" frameborder="0"><h1>Title</h1></iframe></div>
+  </div>
+</body>
+</html>
