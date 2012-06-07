@@ -3,6 +3,7 @@
 <head>
 <script src="drag-resize-dock.js"></script>
 <style>
+html				{ height: 100%; }
 /*** Wikipedia iframe ***/
 #WikiBox			{ position: fixed; z-index: 101; cursor: progress; border-radius: 1.5ex; display: none; }
 #WikiBox.Expanding	{ border: 2px solid black; -webkit-transition: all 1s ease-in-out; -moz-transition: all 1s ease-in-out; -ms-transition: all 1s ease-in-out; transition: all 1s ease-in-out; display: block; }
@@ -16,7 +17,7 @@
 </style>
 </head>
 <body>
- <a href="." class="DragResizeDock">Ptable</a>
+ <a class="DragResizeDock">Ptable</a>
 
   <div id="WikiBox">
    <h1 id="WikiTitle"><button id="Close">×</button><button id="Tearoff">⇧</button> <span id="Source"></span> - <a href="." id="ElementName"></a> - Title</h1>

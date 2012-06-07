@@ -1,7 +1,7 @@
 "use strict";
 
 var DragResizeDock = new function() {
-	var externalWiki, wikibox, wikititle, firstWiki = true;
+	var externalWiki, wikibox, wikititle, firstWiki = true, blockClick, resizetype;
 
 this.startup = function() {
 	var anchors = document.getElementsByTagName("a");
