@@ -4,8 +4,9 @@ var DragResizeDock = new function() {
 	var externalWiki, wikibox, wikititle, firstWiki = true, blockClick, resizetype;
 	var options = {
 		showContentsWhileChanging: true,		// show/hide iframe while dragging or resizing for performance reasons
-		dimOpacityWhileChanging: 0.8,			// set to 1 disable
+		opacityWhileChanging: 1,				// set to 1 disable
 		dockedFrameSize: "50%",					// initial height or width of frame when docked at an edge
+		openWindowAtEdge: true,					// when dragged to edge, attempt to open window
 	};
 
 this.startup = function() {
@@ -24,7 +25,8 @@ var startWikiDrag = function(e) {
 	removeclass(wikibox, "Expanding");
 	if (!options.showContentsWhileChanging)
 		document.getElementById("WikiFrameBox").style.display = wikibox.getElementsByTagName("p")[0].style.display = "none";
-	set_opacity(wikibox, options.dimOpacityWhileChanging);
+	addclass(wikititle, "Active");
+	set_opacity(wikibox, options.opacityWhileChanging);
 	save_wiki_location(e, wikibox);
 	e.cancelBubble = true;
 	document.onmousemove = moveWiki;
@@ -134,7 +136,8 @@ var startResize = function(e) {
 	e = e || event;
 	if (!options.showContentsWhileChanging)
 		document.getElementById("WikiFrameBox").style.display = wikibox.getElementsByTagName("p")[0].style.display = "none";
-	set_opacity(wikibox, 0.80);
+	addclass(wikititle, "Active");
+	set_opacity(wikibox, options.opacityWhileChanging);
 	save_wiki_location(e, wikibox);
 	determineResizeType(e);
 	wikibox.onmouseover = null;
@@ -216,6 +219,7 @@ var tearoff_window = function(e, navigate) {
 var releaseWiki = function() {
 	document.onmousemove = null;
 	document.onmouseup = null;
+	removeclass(wikititle, "Active");
 	wikibox.onmouseover = determineResizeType;
 	set_opacity(wikibox, 1);
 	document.getElementById("WikiFrameBox").style.display = "";

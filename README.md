@@ -21,3 +21,4 @@ Drag-Resize-Dock is a modularized version of the Wikipedia element entries that 
 * Smart resizing when docked that allocates more room for the page content or shifts it over as needed.
 * If the top or bottom edge is dragged to the top or bottom of the page, it will expand to the full height of the page.
 * Remembers sizes after being closed and reopened.
+* Windows escape/open into the desktop at their current location on the page.
