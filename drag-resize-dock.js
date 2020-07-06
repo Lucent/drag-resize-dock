@@ -1,37 +1,34 @@
-"use strict";
+var externalWiki, wikibox, wikititle, firstWiki = true, blockClick, resizetype;
+var options = {
+	showContentsWhileChanging: true,		// show/hide iframe while dragging or resizing for performance reasons
+	opacityWhileChanging: 1,				// set to 1 disable
+	dockedFrameSize: "50%",					// initial height or width of frame when docked at an edge
+	openWindowAtEdge: true,					// when dragged to edge, attempt to open window
+};
 
-var DragResizeDock = new function() {
-	var externalWiki, wikibox, wikititle, firstWiki = true, blockClick, resizetype;
-	var options = {
-		showContentsWhileChanging: true,		// show/hide iframe while dragging or resizing for performance reasons
-		opacityWhileChanging: 1,				// set to 1 disable
-		dockedFrameSize: "50%",					// initial height or width of frame when docked at an edge
-		openWindowAtEdge: true,					// when dragged to edge, attempt to open window
-	};
-
-this.startup = function() {
+function init() {
 	var anchors = document.getElementsByTagName("a");
-	for (var x = 0; x < anchors.length; x++) {
-		if (hasclass(anchors[x], "DragResizeDock"))
-			anchors[x].onclick = click_wiki;
-	}
+	[...anchors].forEach(anchor => {
+		if (anchor.classList.contains("DragResizeDock"))
+			anchor.onclick = click_wiki;
+	});
 	wikibox = document.getElementById("WikiBox");
 	wikititle = document.getElementById("WikiTitle");
-	document.getElementById("WikiFrame").onreadystatechange = document.getElementById("WikiFrame").onload = iframe_loaded;
+	document.getElementById("WikiFrame").onreadystatechange =
+	document.getElementById("WikiFrame").onload = iframe_loaded;
 };
 
 var startWikiDrag = function(e) {
-	e = e || event;
-	removeclass(wikibox, "Expanding");
+	wikibox.classList.remove("Expanding");
 	if (!options.showContentsWhileChanging)
 		document.getElementById("WikiFrameBox").style.display = wikibox.getElementsByTagName("p")[0].style.display = "none";
-	addclass(wikititle, "Active");
+	wikititle.classList.add("Active");
 	set_opacity(wikibox, options.opacityWhileChanging);
 	save_wiki_location(e, wikibox);
 	e.cancelBubble = true;
 	document.onmousemove = moveWiki;
 	document.onmouseup = releaseWiki;
-	if (e.preventDefault) e.preventDefault();
+	e.preventDefault();
 };
 
 var save_wiki_location = function(e, el) {
@@ -46,7 +43,6 @@ var save_wiki_location = function(e, el) {
 };
 
 var moveWiki = function(e) {
-	e = e || event;
 	var gap = 10, dock_pct;
 	if (wikibox.dockSize && wikibox.dockSize.indexOf("px") === -1)
 		dock_pct = wikibox.dockSize;
@@ -113,7 +109,6 @@ var snap_to = function(top, right, bottom, left, width, height) {
 
 var determineResizeType = function(e) {
 	if (wikibox.getElementsByTagName("p")[0].style.display === "none") {
-		e = e || event;
 		var frac = 20;
 		resizetype = "";
 		if (wikibox.offsetTop + wikibox.offsetHeight / frac > e.clientY)
@@ -133,10 +128,9 @@ var determineResizeType = function(e) {
 };
 
 var startResize = function(e) {
-	e = e || event;
 	if (!options.showContentsWhileChanging)
 		document.getElementById("WikiFrameBox").style.display = wikibox.getElementsByTagName("p")[0].style.display = "none";
-	addclass(wikititle, "Active");
+	wikititle.classList.add("Active");
 	set_opacity(wikibox, options.opacityWhileChanging);
 	save_wiki_location(e, wikibox);
 	determineResizeType(e);
@@ -147,7 +141,6 @@ var startResize = function(e) {
 };
 
 var duringResize = function(e) {
-	e = e || event;
 	var minsize = {x: 300, y: 100}, gap = 10, border = 5,
 		distX = wikibox.mouseStartX - e.clientX,
 		distY = wikibox.mouseStartY - e.clientY;
@@ -201,8 +194,7 @@ var duringResize = function(e) {
 };
 
 var tearoff_window = function(e, navigate) {
-	removeclass(wikibox, "Expanding");
-	e = e || event;
+	wikibox.classList.remove("Expanding");
 	save_wiki_location(e, wikibox);
 	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 	var xOffset = window.pageXOffset || document.documentElement.scrollLeft;
@@ -219,14 +211,13 @@ var tearoff_window = function(e, navigate) {
 var releaseWiki = function() {
 	document.onmousemove = null;
 	document.onmouseup = null;
-	removeclass(wikititle, "Active");
+	wikititle.classList.remove("Active");
 	wikibox.onmouseover = determineResizeType;
 	set_opacity(wikibox, 1);
 	document.getElementById("WikiFrameBox").style.display = "";
 };
 
 var doubleClickTitle = function(e) {
-	e = e || event;
 	if (wikibox.saveHeight) {
 		undock();
 		restoreSize(true);
@@ -244,13 +235,10 @@ var open_wiki_window = function(pos, size) {
 };
 
 var click_wiki = function(e) {
-	e = e || event;
 	var el = (e.target || e.srcElement), article, url;
 
 	if (screen.width * screen.height < 1024 * 600 ||				// Skip for small tablets
-		typeof document.body.style.maxHeight === "undefined" ||		// Skip for IE6
 		!navigator.onLine || e.ctrlKey || e.shiftKey ||				// Passthrough Shift, Ctrl click
-		(e.which && (e.which === 2 || e.which === 3)) ||
 		(e.button && (e.button === 4 || e.button === 2)))			// Passthrough middle click
 	return;
 
@@ -279,15 +267,15 @@ var click_wiki = function(e) {
 				sty = document.styleSheets[0];
 			if (sty.cssRules && sty.cssRules[0].selectorText === "#WikiBox") sty.deleteRule(0);
 			if (sty.insertRule) sty.insertRule("#WikiBox { left: " + (-elementPos[0] - xOffset) / document.documentElement.clientWidth * 100 + "%; top: " + (-elementPos[1] - yOffset) / document.documentElement.clientHeight * 100 + "%; width: " + el.offsetWidth / document.documentElement.clientWidth * 100 + "%; height: " + el.offsetHeight / document.documentElement.clientHeight * 100 + "%; }", 0);
-			addclass(wikibox, "Expanding");
+			wikibox.classList.add("Expanding");
 
 			var q = wikibox.offsetWidth; // quantum mechanical nonsense
-			addclass(wikibox, "Expanded");
+			wikibox.classList.add("Expanded");
 			firstWiki = false;
 		} else {
-			if (!hasclass(wikibox, "Expanded") && (wikibox.style.height === "auto" || wikibox.style.width === "auto"))
+			if (!wikibox.classList.contains("Expanded") && (wikibox.style.height === "auto" || wikibox.style.width === "auto"))
 				snap_to(wikibox.style.top, wikibox.style.right, wikibox.style.bottom, wikibox.style.left, wikibox.style.width, wikibox.style.height);
-			addclass(wikibox, "Expanded");
+			wikibox.classList.add("Expanded");
 		}
 	}
 
@@ -313,28 +301,13 @@ var restoreSize = function(andposition) {
 
 var destroy = function() {
 	window.frames["WikiFrame"].location.replace("about:blank");
-	removeclass(wikibox, "Expanded");
-	removeclass(wikibox, "Expanding");
+	wikibox.classList.remove("Expanded", "Expanding");
 	undock();
 };
 
 var iframe_loaded = function(e) {
 	document.getElementById("WikiFrameBox").style.display = "";
 	wikibox.getElementsByTagName("p")[0].style.display = "none";
-};
-
-var addclass = function(el, name) {
-	if (!hasclass(el, name))
-		el.className += (el.className ? " " : "") + name;
-};
-
-var removeclass = function(el, name) {
-	if (hasclass(el, name))
-		el.className = el.className.replace(new RegExp("(\\s|^)" + name + "(\\s|$)"), " ").replace(/^\s+|\s+$/g, "");
-};
-
-var hasclass = function(el, name) {
-	return new RegExp("(\\s|^)" + name + "(\\s|$)").test(el.className);
 };
 
 var findPos = function(obj, lefttop) {
@@ -346,6 +319,4 @@ var set_opacity = function(el, value) {
 	el.style.filter = (value != 1) ? "alpha(Opacity=" + value * 100 + ")" : "";
 };
 
-}; // End DragResizeDock namespace
-
-window.onload = DragResizeDock.startup;
+init();
